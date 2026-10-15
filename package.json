@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "node --watch api/index.js",
+    "dev:server": "node --watch-path=api api/index.js",
     "build": "vite build",
     "preview": "vite preview",
     "db:seed": "node api/db/seed.js"
