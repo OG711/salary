@@ -12,20 +12,33 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// API Routes
+// Support both with and without /api prefix for Vercel rewrites compatibility
 app.use('/api/categories', categoriesRouter);
+app.use('/categories', categoriesRouter);
+
 app.use('/api/transactions', transactionsRouter);
+app.use('/transactions', transactionsRouter);
+
 app.use('/api/analytics', analyticsRouter);
+app.use('/analytics', analyticsRouter);
 
-// Health check / root API route
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Health check endpoints
+const healthHandler = (req, res) => {
+  res.json({
+    status: 'ok',
+    tursoConfigured: Boolean(process.env.TURSO_DATABASE_URL),
+    timestamp: new Date().toISOString(),
+  });
+};
 
-// If run directly (e.g. node api/index.js or npm run dev:server)
-const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  // Only start listening if not running inside Vercel serverless wrapper
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
+app.get('/api', healthHandler);
+app.get('/', healthHandler);
+
+// Only listen locally, never in Vercel Serverless environment
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`Finance Tracker API server running on port ${PORT}`);
   });
